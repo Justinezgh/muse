@@ -20,25 +20,23 @@ class lensing_log_normal():
         self.map_size = map_size
         self.gal_per_arcmin2 = gal_per_arcmin2
         self.sigma_e = sigma_e
-        self.shift = shift
-
-
-    def shift_fn(self, omega_m, sigma_8):
 
         a = np.linspace(0.2, 0.4, 8)
         b = np.linspace(0.6, 1.0, 8)
         lognormal_params = np.array(np.meshgrid(a, b)).T.reshape([64, 2])
         lognormal_params = np.concatenate([
             lognormal_params,
-            self.shift.reshape([64, 1])
+            shift.reshape([64, 1])
         ], axis=1)
 
-        shift_table = lognormal_params.reshape([8, 8, 3])
+        self.shift_table = lognormal_params.reshape([8, 8, 3])
+
+    def shift_fn(self, omega_m, sigma_8):
 
         omega_m = jnp.atleast_1d(omega_m)
         sigma_8 = jnp.atleast_1d(sigma_8)
         lambda_shift = map_coordinates(
-            shift_table[:, :, 2],
+            self.shift_table[:, :, 2],
             jnp.stack([
                 (omega_m - 0.2) / 0.2 * 8 - 0.5,
                 (sigma_8 - 0.6) / 0.4 * 8 - 0.5
